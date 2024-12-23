@@ -1,0 +1,6 @@
+database.db
+receipts.db
+
+__pycache__/userinterface.cpython-312.pyc
+__pycache__/process.cpython-312.pyc
+__pycache__/database.cpython-312.pyc
