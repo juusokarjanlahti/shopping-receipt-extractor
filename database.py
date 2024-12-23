@@ -38,6 +38,16 @@ def create_tables():
         conn.commit()
 
 def save_receipt(date, time, total_cost, items):
+    """
+    Save a receipt and its items to the database.
+
+    Parameters:
+    date (str): The date of the receipt.
+    time (str): The time of the receipt.
+    total_cost (float): The total cost of the receipt.
+    items (list): A list of items, where each item is a dictionary containing
+                  'Item', 'Price (EUR)', 'Quantity', and 'Deposit (EUR)'.
+    """
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
@@ -53,18 +63,39 @@ def save_receipt(date, time, total_cost, items):
         conn.commit()
 
 def get_receipts():
+    """
+    Retrieve all receipts from the database.
+
+    Returns:
+    list: A list of receipts.
+    """
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM receipts')
         return cursor.fetchall()
 
 def get_items_for_receipt(receipt_id):
+    """
+    Retrieve items for a specific receipt from the database.
+
+    Parameters:
+    receipt_id (int): The ID of the receipt.
+
+    Returns:
+    list: A list of items for the receipt.
+    """
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM items WHERE receipt_id = ?', (receipt_id,))
         return cursor.fetchall()
 
 def delete_receipt(receipt_id):
+    """
+    Delete a receipt and its items from the database.
+
+    Parameters:
+    receipt_id (int): The ID of the receipt to delete.
+    """
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('DELETE FROM items WHERE receipt_id = ?', (receipt_id,))
