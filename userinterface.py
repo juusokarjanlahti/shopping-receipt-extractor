@@ -97,15 +97,16 @@ class ReceiptApp:
             messagebox.showerror("Error", f"Failed to export data: {e}")
 
     def delete_receipt(self):
-        selected_item = self.tree.selection()
-        if not selected_item:
+        selected_items = self.tree.selection()
+        if not selected_items:
             messagebox.showwarning("Warning", "No receipt selected!")
             return
 
-        receipt_id = self.tree.item(selected_item, 'values')[0]
         try:
-            delete_receipt(receipt_id)
-            messagebox.showinfo("Success", "Receipt deleted successfully!")
+            for selected_item in selected_items:
+                receipt_id = self.tree.item(selected_item, 'values')[0]
+                delete_receipt(receipt_id)
+            messagebox.showinfo("Success", "Selected receipts deleted successfully!")
             self.load_receipts()
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to delete receipt: {e}")
+            messagebox.showerror("Error", f"Failed to delete receipts: {e}")
