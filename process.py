@@ -1,19 +1,38 @@
 import re
+import logging
+from PIL import Image
+import pytesseract
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def perform_ocr(file_path):
-    # Implement OCR logic here using pytesseract or another OCR library
-    from PIL import Image
-    import pytesseract
-
     try:
         image = Image.open(file_path)
         extracted_text = pytesseract.image_to_string(image, lang="fin")
-        print("Raw extracted text:\n", extracted_text)  # Print the raw extracted text
+        logging.info("Raw extracted text:\n%s", extracted_text)  # Log the raw extracted text
         return extracted_text
     except Exception as e:
         raise RuntimeError(f"Error during OCR processing: {e}")
 
 def process_extracted_text(extracted_text):
+    """
+    Process the extracted text to retrieve transaction details.
+
+    Args:
+        extracted_text (str): The raw text extracted from the receipt.
+
+    Returns:
+        tuple: A tuple containing:
+            - transaction_date (str or None): The date of the transaction in the format 'dd/mm/yyyy'.
+            - transaction_time (str or None): The time of the transaction in the format 'hh:mm'.
+            - total_cost (float): The total cost of the transaction.
+            - items (list of dict): A list of dictionaries, each containing:
+                - 'Item' (str): The name of the item.
+                - 'Price (EUR)' (float): The price of the item.
+                - 'Quantity' (int): The quantity of the item.
+                - 'Deposit (EUR)' (float): The deposit for the item.
+    """
     # Initialize data
     transaction_date, transaction_time, total_cost = None, None, 0.0
     items = []
@@ -35,7 +54,7 @@ def process_extracted_text(extracted_text):
         items_text = items_section.group(1).strip()
         lines = items_text.splitlines()
         for line in lines:
-            item_match = re.match(r"(.+?)\s([\d,\.]+)\s?[A-Z]?", line)
+            item_match = re.match(r"(.+?)\s+([\d,\.]+)\s?[A-Z]?", line)
             if item_match:
                 item_name = item_match.group(1).strip()
                 combined_price = float(item_match.group(2).replace(',', '.'))
@@ -43,7 +62,7 @@ def process_extracted_text(extracted_text):
                 price = combined_price
 
                 # Check for quantity and individual price
-                quantity_match = re.search(r"(\d+)\s*x\s*([\d,\.]+)", line)
+                quantity_match = re.search(r"(\d+)\s*x\s*([\d,.,]+)", line)
                 if quantity_match:
                     quantity = int(quantity_match.group(1))
                     price = float(quantity_match.group(2).replace(',', '.'))
@@ -52,7 +71,7 @@ def process_extracted_text(extracted_text):
 
             # Handle deposits (Pantti)
             if "Pantti" in line:
-                deposit_match = re.search(r"Pantti.*([\d,\.]+)", line)
+                deposit_match = re.search(r"Pantti.*([\d,.,]+)", line)
                 if deposit_match:
                     deposit = float(deposit_match.group(1).replace(',', '.'))
                     if items:
