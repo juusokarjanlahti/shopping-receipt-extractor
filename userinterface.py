@@ -80,7 +80,10 @@ class ReceiptApp:
         tree.pack(fill="both", expand=True, pady=20)
 
         for item in items:
-            tree.insert('', 'end', values=(item[2], item[3], item[4], item[5], item[6]))
+            formatted_price = format(float(item[3]), '.2f')
+            formatted_deposit = format(float(item[5]), '.2f') if item[5] is not None else None
+            formatted_price_per_kg = format(float(item[6]), '.2f') if item[6] is not None else None
+            tree.insert('', 'end', values=(item[2], formatted_price, item[4], formatted_deposit, formatted_price_per_kg))
 
     def export_to_csv(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])

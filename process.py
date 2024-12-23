@@ -77,7 +77,7 @@ def process_extracted_text(extracted_text):
             if quantity_match and previous_item:
                 quantity = int(quantity_match.group(1))
                 price = float(quantity_match.group(2).replace(',', '.'))
-                previous_item["Price (EUR)"] = price
+                previous_item["Price (EUR)"] = format(price, '.2f')
                 previous_item["Quantity"] = quantity
                 continue  # Skip adding this line as a new item
 
@@ -88,9 +88,9 @@ def process_extracted_text(extracted_text):
                 price = float(item_match.group(2).replace(',', '.'))
                 quantity = 1
 
-                previous_item = {"Item": item_name, "Price (EUR)": price, "Quantity": quantity, "Deposit (EUR)": 0.0, "Price per kg (EUR/kg)": None}
+                previous_item = {"Item": item_name, "Price (EUR)": format(price, '.2f'), "Quantity": quantity, "Deposit (EUR)": 0.0, "Price per kg (EUR/kg)": None}
                 items.append(previous_item)
-                logging.info("Added item: %s with price: %s EUR", item_name, price)
+                logging.info("Added item: %s with price: %s EUR", item_name, format(price, '.2f'))
 
             # Handle deposits (Pantti)
             if "Pantti" in line:
@@ -98,6 +98,6 @@ def process_extracted_text(extracted_text):
                 if deposit_match:
                     deposit = float(deposit_match.group(1).replace(',', '.'))
                     if items:
-                        items[-1]["Deposit (EUR)"] = deposit  # Update the last item's deposit
+                        items[-1]["Deposit (EUR)"] = format(deposit, '.2f')  # Update the last item's deposit
 
     return transaction_date, transaction_time, total_cost, items
