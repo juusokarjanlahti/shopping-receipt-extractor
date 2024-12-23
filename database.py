@@ -46,3 +46,8 @@ def get_receipts():
 def get_items_for_receipt(receipt_id):
     cursor.execute('SELECT * FROM items WHERE receipt_id = ?', (receipt_id,))
     return cursor.fetchall()
+
+def delete_receipt(receipt_id):
+    cursor.execute('DELETE FROM items WHERE receipt_id = ?', (receipt_id,))
+    cursor.execute('DELETE FROM receipts WHERE id = ?', (receipt_id,))
+    conn.commit()

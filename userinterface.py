@@ -1,6 +1,6 @@
 import csv
 from tkinter import Toplevel, Label, Button, filedialog, ttk, messagebox
-from database import save_receipt, get_receipts, get_items_for_receipt
+from database import save_receipt, get_receipts, get_items_for_receipt, delete_receipt
 from process import perform_ocr, process_extracted_text
 
 class ReceiptApp:
@@ -27,6 +27,9 @@ class ReceiptApp:
 
         self.refresh_btn = Button(self.root, text="Refresh Data", command=self.load_receipts)
         self.refresh_btn.pack(pady=10)
+
+        self.delete_btn = Button(self.root, text="Delete Receipt", command=self.delete_receipt)
+        self.delete_btn.pack(pady=5)
 
         self.load_receipts()
 
@@ -92,3 +95,17 @@ class ReceiptApp:
             messagebox.showinfo("Success", "Data exported to CSV successfully!")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to export data: {e}")
+
+    def delete_receipt(self):
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Warning", "No receipt selected!")
+            return
+
+        receipt_id = self.tree.item(selected_item, 'values')[0]
+        try:
+            delete_receipt(receipt_id)
+            messagebox.showinfo("Success", "Receipt deleted successfully!")
+            self.load_receipts()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to delete receipt: {e}")
