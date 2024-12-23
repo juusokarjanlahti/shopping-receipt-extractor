@@ -53,21 +53,32 @@ def process_extracted_text(extracted_text):
     if items_section:
         items_text = items_section.group(1).strip()
         lines = items_text.splitlines()
+        previous_item = None
         for line in lines:
-            item_match = re.match(r"(.+?)\s+([\d,\.]+)\s?[A-Z]?", line)
+            line = line.strip()
+            if not line:
+                continue  # Skip empty lines
+
+            logging.info("Processing line: %s", line)  # Log each line being processed
+
+            # Check if the line contains quantity and price information for the previous item
+            quantity_match = re.match(r"(\d+)\s*x\s*([\d,.,]+)", line)
+            if quantity_match and previous_item:
+                quantity = int(quantity_match.group(1))
+                price = float(quantity_match.group(2).replace(',', '.'))
+                previous_item["Price (EUR)"] = price
+                previous_item["Quantity"] = quantity
+                continue  # Skip adding this line as a new item
+
+            # Check if the line contains item name and price
+            item_match = re.match(r"(.+?)\s+([\d,\.]+)\s?[A-Z]?$", line)
             if item_match:
                 item_name = item_match.group(1).strip()
-                combined_price = float(item_match.group(2).replace(',', '.'))
+                price = float(item_match.group(2).replace(',', '.'))
                 quantity = 1
-                price = combined_price
 
-                # Check for quantity and individual price
-                quantity_match = re.search(r"(\d+)\s*x\s*([\d,.,]+)", line)
-                if quantity_match:
-                    quantity = int(quantity_match.group(1))
-                    price = float(quantity_match.group(2).replace(',', '.'))
-
-                items.append({"Item": item_name, "Price (EUR)": price, "Quantity": quantity, "Deposit (EUR)": 0.0})
+                previous_item = {"Item": item_name, "Price (EUR)": price, "Quantity": quantity, "Deposit (EUR)": 0.0}
+                items.append(previous_item)
 
             # Handle deposits (Pantti)
             if "Pantti" in line:
