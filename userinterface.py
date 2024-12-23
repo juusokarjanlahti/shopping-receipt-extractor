@@ -71,15 +71,16 @@ class ReceiptApp:
         popup.title("Receipt Items")
         popup.geometry("600x400")
 
-        tree = ttk.Treeview(popup, columns=("Item", "Price", "Quantity", "Deposit"), show="headings")
+        tree = ttk.Treeview(popup, columns=("Item", "Price", "Quantity", "Deposit", "EUR/kg"), show="headings")
         tree.heading("Item", text="Item Name")
         tree.heading("Price", text="Price (EUR)")
         tree.heading("Quantity", text="Quantity")
         tree.heading("Deposit", text="Deposit (EUR)")
+        tree.heading("EUR/kg", text="Price per kg (EUR)")
         tree.pack(fill="both", expand=True, pady=20)
 
         for item in items:
-            tree.insert('', 'end', values=(item[2], item[3], item[4], item[5]))
+            tree.insert('', 'end', values=(item[2], item[3], item[4], item[5], item[6]))
 
     def export_to_csv(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])

@@ -32,6 +32,7 @@ def process_extracted_text(extracted_text):
                 - 'Price (EUR)' (float): The price of the item.
                 - 'Quantity' (int): The quantity of the item.
                 - 'Deposit (EUR)' (float): The deposit for the item.
+                - 'Price per kg (EUR/kg)' (float or None): The price per kilogram for weighed items.
     """
     # Initialize data
     transaction_date, transaction_time, total_cost = None, None, 0.0
@@ -61,6 +62,16 @@ def process_extracted_text(extracted_text):
 
             logging.info("Processing line: %s", line)  # Log each line being processed
 
+            # Check if the line contains price per kilogram information for the previous item
+            price_per_kg_match = re.match(r"([\d,\.]+)\s*kg\s*x\s*([\d,.,]+)\s*EUR/kg", line)
+            if price_per_kg_match and previous_item:
+                weight = float(price_per_kg_match.group(1).replace(',', '.'))
+                price_per_kg = float(price_per_kg_match.group(2).replace(',', '.'))
+                logging.info("Found price per kg: %s EUR/kg for item: %s", price_per_kg, previous_item["Item"])
+                previous_item["Price per kg (EUR/kg)"] = price_per_kg
+                previous_item["Quantity"] = weight  # Set quantity to the weight for weighed items
+                continue  # Skip adding this line as a new item
+
             # Check if the line contains quantity and price information for the previous item
             quantity_match = re.match(r"(\d+)\s*x\s*([\d,.,]+)", line)
             if quantity_match and previous_item:
@@ -77,8 +88,9 @@ def process_extracted_text(extracted_text):
                 price = float(item_match.group(2).replace(',', '.'))
                 quantity = 1
 
-                previous_item = {"Item": item_name, "Price (EUR)": price, "Quantity": quantity, "Deposit (EUR)": 0.0}
+                previous_item = {"Item": item_name, "Price (EUR)": price, "Quantity": quantity, "Deposit (EUR)": 0.0, "Price per kg (EUR/kg)": None}
                 items.append(previous_item)
+                logging.info("Added item: %s with price: %s EUR", item_name, price)
 
             # Handle deposits (Pantti)
             if "Pantti" in line:
