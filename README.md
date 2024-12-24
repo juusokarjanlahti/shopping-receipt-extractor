@@ -40,3 +40,14 @@ python main.py
 3. Use the GUI to upload receipt images, view extracted data, and export data to CSV.
 
 You can use the cropped example `receipt.png` for testing.
+
+## Todo
+
+Handle deposit (Pantti) for relevant items
+Extract tax related information
+Handle any discounts, rebates, vouchers etc.
+Test how ------ and % are handled
+Categorize items
+Statistics per item
+
+
